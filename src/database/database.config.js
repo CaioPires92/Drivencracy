@@ -3,8 +3,10 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 const mongoClient = new MongoClient(process.env.DATABASE_URL)
+
 try {
-  console.log('MongoDB conectado!')
+  await mongoClient.connect()
+  console.log('MongoDB connectado!')
 } catch (err) {
   console.log(err.message)
 }
