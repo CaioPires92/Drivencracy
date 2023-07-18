@@ -90,6 +90,11 @@ export async function getChoice(req, res) {
       .collection('choices')
       .find({ pollId: { $eq: id } })
       .toArray()
+
+    if (choice.length === 0) {
+      return res.sendStatus(404)
+    }
+
     res.send(choice)
   } catch (err) {
     res.status(500).send(err.message)
@@ -97,16 +102,76 @@ export async function getChoice(req, res) {
 }
 
 export async function postVote(req, res) {
+  const { id } = req.params
+
+  console.log(id)
+
   try {
-    //
+    // Verificar se é uma opção existente
+    const choice = await db
+      .collection('choices')
+      .findOne({ _id: new ObjectId(id) })
+    if (!choice) {
+      return res.status(404).send('Opção não encontrada.')
+    }
+
+    // Verificar se a enquete já expirou
+    const poll = await db
+      .collection('poll')
+      .findOne({ _id: new ObjectId(choice.pollId) })
+    if (new Date() > new Date(poll.expireAt)) {
+      return res.status(403).send('A enquete já expirou.')
+    }
+
+    // Registrar o voto
+    await db.collection('votes').insertOne({
+      choiceId: id,
+      createdAt: new Date()
+    })
+
+    res.sendStatus(201)
   } catch (err) {
     res.status(500).send(err.message)
   }
 }
 
 export async function getResult(req, res) {
+  const { id } = req.params
+
   try {
-    //
+    // Verificar se a enquete existe
+    const poll = await db.collection('poll').findOne({ _id: new ObjectId(id) })
+    if (!poll) {
+      return res.status(404).send('Enquete não encontrada.')
+    }
+
+    // Obter a opção de voto mais votada
+    const result = await db
+      .collection('choices')
+      .aggregate([
+        { $match: { pollId: id } },
+        {
+          $lookup: {
+            from: 'votes',
+            localField: '_id',
+            foreignField: 'choiceId',
+            as: 'votes'
+          }
+        },
+        { $project: { _id: 0, title: 1, votes: { $size: '$votes' } } },
+        { $sort: { votes: -1 } },
+        { $limit: 1 }
+      ])
+      .toArray()
+
+    const pollResult = {
+      _id: poll._id,
+      title: poll.title,
+      expireAt: poll.expireAt,
+      result: result[0] || null
+    }
+
+    res.send(pollResult)
   } catch (err) {
     res.status(500).send(err.message)
   }
