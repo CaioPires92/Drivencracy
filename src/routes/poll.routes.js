@@ -1,12 +1,9 @@
 import { Router } from 'express'
-import {
-  createChoice,
-  createPoll,
-  getChoice,
-  getPoll,
-  getResult,
-  postVote
-} from '../controllers/poll.controllers.js'
+
+import { createPoll, getPoll } from '../controllers/poll.controllers.js'
+import { createChoice, getChoice } from '../controllers/choice.controlle.js'
+import { getResult } from '../controllers/result.controller.js'
+import { postVote } from '../controllers/vote.controller.js'
 
 const pollRouter = Router()
 
