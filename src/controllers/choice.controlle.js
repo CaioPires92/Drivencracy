@@ -7,7 +7,7 @@ export async function createChoice(req, res) {
 
   const choice = {
     title,
-    pollId
+    pollId: new ObjectId(pollId)
   }
 
   const poll = await db
@@ -44,12 +44,11 @@ export async function createChoice(req, res) {
 export async function getChoice(req, res) {
   const { id } = req.params
 
-  console.log(id)
-
   try {
     const choice = await db
       .collection('choices')
-      .find({ pollId: { $eq: id } })
+      // .find({ pollId: { $eq: id } })
+      .find({ pollId: new ObjectId(id) })
       .project({ votes: 0 })
       .toArray()
 

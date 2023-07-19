@@ -25,8 +25,8 @@ export async function postVote(req, res) {
       .updateOne({ _id: new ObjectId(id) }, { $inc: { votes: 1 } })
 
     const vote = {
-      choiceId: id,
-      createdAt: dayjs().format('YYYY-MM-DD HH:mm')
+      createdAt: dayjs().format('YYYY-MM-DD HH:mm'),
+      choiceId: new ObjectId(id)
     }
 
     await db.collection('votes').insertOne(vote)

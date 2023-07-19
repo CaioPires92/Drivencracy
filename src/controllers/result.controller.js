@@ -12,7 +12,7 @@ export async function getResult(req, res) {
 
     const result = await db
       .collection('choices')
-      .find({ pollId: id })
+      .find({ pollId: new ObjectId(id) })
       .project({ _id: 0, title: 1, votes: 1 })
       .sort({ votes: -1 })
       .limit(1)
