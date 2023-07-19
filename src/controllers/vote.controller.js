@@ -1,5 +1,6 @@
 import { db } from '../database/database.config.js'
 import { ObjectId } from 'mongodb'
+import dayjs from 'dayjs'
 
 export async function postVote(req, res) {
   const { id } = req.params
@@ -22,6 +23,13 @@ export async function postVote(req, res) {
     await db
       .collection('choices')
       .updateOne({ _id: new ObjectId(id) }, { $inc: { votes: 1 } })
+
+    const vote = {
+      choiceId: id,
+      createdAt: dayjs().format('YYYY-MM-DD HH:mm')
+    }
+
+    await db.collection('votes').insertOne(vote)
 
     res.sendStatus(201)
   } catch (err) {

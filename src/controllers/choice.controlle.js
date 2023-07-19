@@ -50,6 +50,7 @@ export async function getChoice(req, res) {
     const choice = await db
       .collection('choices')
       .find({ pollId: { $eq: id } })
+      .project({ votes: 0 })
       .toArray()
 
     if (choice.length === 0) {
