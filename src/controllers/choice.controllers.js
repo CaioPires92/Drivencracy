@@ -47,7 +47,6 @@ export async function getChoice(req, res) {
   try {
     const choice = await db
       .collection('choices')
-      // .find({ pollId: { $eq: id } })
       .find({ pollId: new ObjectId(id) })
       .project({ votes: 0 })
       .toArray()
